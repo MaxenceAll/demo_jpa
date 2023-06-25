@@ -29,6 +29,6 @@ public class Employee {
     private String email;
     private LocalDate birthdate;
     private String role;
-    /* FUCKING BAD IDE*/
+    /* GIT PUSH NOT WORKING W>HY*/
 
 }
