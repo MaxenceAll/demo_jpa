@@ -1,4 +1,4 @@
-package com.workshop.demo;
+package com.workshop.demo.search;
 
 import com.workshop.demo.models.Employee;
 import jakarta.persistence.EntityManager;
@@ -10,6 +10,7 @@ import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -40,6 +41,37 @@ public class EmployeeSearchDao {
         // or lastname like '%ali%' and email like '%email%'
         Predicate andEmailPredicate = criteriaBuilder.and(firstnameOrLastnamePredicate, emailPredicate);
         criteriaQuery.where(andEmailPredicate);
+
+        TypedQuery<Employee> query = em.createQuery(criteriaQuery);
+        return query.getResultList();
+    }
+
+    public List<Employee> findAllByCriteria(
+            SearchRequest searchRequest
+    ){
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<Employee> criteriaQuery = criteriaBuilder.createQuery(Employee.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+
+        //SELECT from employee
+        Root<Employee> root = criteriaQuery.from(Employee.class);
+        if (searchRequest.getFirstname()!= null){
+            Predicate firstnamePredicate = criteriaBuilder.like(root.get("firstname"), "%"+searchRequest.getFirstname()+"%");
+            predicates.add(firstnamePredicate);
+        }
+        if (searchRequest.getLastname()!= null){
+            Predicate lastnamePredicate = criteriaBuilder.like(root.get("lastname"), "%"+searchRequest.getLastname()+"%");
+            predicates.add(lastnamePredicate);
+        }
+        if (searchRequest.getEmail()!= null){
+            Predicate emailPredicate = criteriaBuilder.like(root.get("firstname"), "%"+searchRequest.getEmail()+"%");
+            predicates.add(emailPredicate);
+        }
+
+        criteriaQuery.where(
+                criteriaBuilder.or(predicates.toArray(new Predicate[0]))
+        );
 
         TypedQuery<Employee> query = em.createQuery(criteriaQuery);
         return query.getResultList();
